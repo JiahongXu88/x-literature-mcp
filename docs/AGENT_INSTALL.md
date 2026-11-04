@@ -40,8 +40,8 @@ It never edits MCP client configuration, never deletes caches, and makes no netw
 
 | Host | Interface used in the README | Evidence |
 |---|---|---|
-| Claude Code | `claude mcp add --scope user … -- node …`, `claude mcp list/get/remove` | Real install from a fresh clone, connection and tool call verified on Windows |
-| Codex CLI | `codex mcp add NAME --env K=V -- node …`, `~/.codex/config.toml` `[mcp_servers.NAME]` | codex-cli 0.154 on Windows: `codex mcp add` output checked in an isolated `CODEX_HOME`; a real `codex exec` session listed the 7 tools and called `list_papers` |
+| Claude Code | `claude mcp add --scope user … -- node …`, `claude mcp list/get/remove` | Claude Code 2.1 on Windows: a fresh headless session given only the GitHub URL and the request above cloned, built, created the venv, ran the doctor, registered at user scope (`✔ Connected`) without touching an existing entry; a new session then called `list_papers` and `search_papers` |
+| Codex CLI | `codex mcp add NAME --env K=V -- node …`, `~/.codex/config.toml` `[mcp_servers.NAME]` | codex-cli 0.154 on Windows: `codex mcp add` output checked in an isolated `CODEX_HOME`; a real `codex exec` session (server passed with `-c mcp_servers.…` overrides) listed the 7 tools and called `list_papers` |
 | Gemini CLI | `gemini mcp add --scope user -e K=V NAME node …`, `~/.gemini/settings.json` `mcpServers` | Gemini CLI 0.66 on Windows with an isolated home: `gemini mcp add --scope user` output checked, `gemini mcp list` → Connected (trusted folder only); tool call through Gemini not run |
 | Cursor | `~/.cursor/mcp.json` / `.cursor/mcp.json`, `mcpServers` with `type: "stdio"` | Checked against cursor.com/docs MCP page; not run |
 | VS Code / Copilot | `mcp.json` with `servers`; portable `.mcp.json` / `~/.copilot/mcp-config.json` with `mcpServers`; `code --add-mcp` | Checked against the VS Code MCP configuration reference; not run |

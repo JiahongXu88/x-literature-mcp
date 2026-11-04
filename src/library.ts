@@ -123,7 +123,7 @@ interface WorkerExtract {
   largestFontLine: string;
   toc: Array<[number, string, number]>;
   headings: Array<{ page: number; text: string; signal: string }>;
-  pages: Array<{ page: number; blocks: Array<{ text: string }>; imageCount: number; twoColumn: boolean }>;
+  pages: Array<{ page: number; blocks: Array<{ text: string; bbox?: number[] }>; imageCount: number; twoColumn: boolean }>;
   isEncryptedFlag: boolean;
   notes: string[];
 }
@@ -518,7 +518,11 @@ export function buildExtraction(sha256: string, raw: WorkerExtract): Extraction 
   });
   const drop = repeatedLines(raw.pages);
   const references = extractReferences(
-    raw.pages.map((p) => ({ page: p.page, blocks: p.blocks.map((b) => b.text) })),
+    raw.pages.map((p) => ({
+      page: p.page,
+      blocks: p.blocks.map((b) => b.text),
+      ...(p.blocks.every((b) => Array.isArray(b.bbox) && b.bbox.length === 4) ? { boxes: p.blocks.map((b) => b.bbox!) } : {}),
+    })),
     drop,
   );
   const headings = raw.headings.filter((h) => !drop.has(h.text));

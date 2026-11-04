@@ -148,6 +148,10 @@ describe("MCP stdio server", () => {
     expect(json.total).toBe(4);
     expect(json.entries[2]).toMatchObject({ number: 3, page_start: 3, page_end: 4 });
     expect(json.entries[0].fields).toMatchObject({ title: "基于检测的多目标跟踪综述", year: 2021 });
+    // v0.1.1 optional additions; the v0.1.0 fields above are unchanged
+    expect(json.entries[0].quality).toEqual({ year: "verified_by_pattern" });
+    expect(json.excluded).toEqual([]);
+    expect(json.extraction_method).toContain("r5.pt-v4n3");
     const en = (await call("get_paper_references", { paper_id: await idOf("english paper.pdf") })).json;
     expect(en.entries[1].fields.doi).toBe("10.1234/test.2020.01");
     const blank = (await call("get_paper_references", { paper_id: await idOf("blank.pdf") })).json;

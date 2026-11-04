@@ -246,7 +246,7 @@ export function registerTools(server: McpServer, library: Library): void {
     {
       title: "Get paper references",
       description:
-        "Reference-list entries as printed (raw_text) with PDF page numbers, plus candidate fields (number/authors/year/title/venue/DOI) parsed by deterministic rules. Fields are unverified candidates; a citation says nothing about inheritance or experimental comparison.",
+        "Reference-list entries as printed (raw_text) with PDF page numbers, plus candidate fields (number/authors/year/title/venue/DOI) parsed by deterministic rules. Fields are unverified candidates (fields.year only when quality.year=verified_by_pattern; otherwise see candidates/issues); text left out as another article's (continuation-marker evidence) is listed in 'excluded' with its page. A citation says nothing about inheritance or experimental comparison.",
       inputSchema: z.object({
         paper_id: PAPER_ID,
         offset: z.number().int().min(0).optional(),
@@ -270,6 +270,7 @@ export function registerTools(server: McpServer, library: Library): void {
           offset: start,
           next_offset: start + size < refs.entries.length ? start + size : null,
           issues: refs.issues,
+          excluded: refs.excluded ?? [],
           extraction_method: `rule-based (${refs.version}); fields are candidates, not verified bibliographic facts`,
           entries: refs.entries.slice(start, start + size),
         });

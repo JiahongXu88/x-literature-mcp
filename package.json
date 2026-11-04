@@ -1,6 +1,6 @@
 {
   "name": "mot-literature-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Local stdio MCP server for deterministic PDF literature access: page text, page images, references, full-text search. No LLM, no network.",
   "license": "MIT",
   "type": "module",

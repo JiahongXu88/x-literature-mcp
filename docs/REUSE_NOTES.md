@@ -18,6 +18,11 @@ Each row was decided after reading the source file and its imports, not the READ
 | `backend/src/sources/identity.ts` | `referenceText.compactTitle` | **skip** | De-duplication is by file SHA-256 only. |
 | ProjectStore / EvidenceStore / AgentRuntime / WorkflowOrchestrator / Web UI / Quality Gate / target-journal services | — | **skip (out of scope)** | — |
 
+**v0.1.1 divergence from the ported code** (in `src/references.ts`; PaperTeam unchanged): the year selection of
+`parseReferenceFields` (last four-digit number in the entry) was replaced by a position-based `pickYear`; the author-year
+collector gained two start rules (joined initials, a CJIG `Authors. Year.` line); the bbox-based layout pass
+(continuation markers, detached labels) is new code with no PaperTeam counterpart.
+
 `docs/research/M15_15_*` and `M15_16_*` were used only as background on CJIG layouts; their constraints are reflected by the ported CJIG tests.
 
 Third-party: `@modelcontextprotocol/server` (Apache-2.0), `zod` (MIT). PyMuPDF (AGPL-3.0 or Artifex commercial) is **not bundled**; the user installs it and it runs as a separate Python process.

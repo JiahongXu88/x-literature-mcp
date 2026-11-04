@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "mot-literature": {
+      "type": "stdio",
+      "command": "node",
+      "args": ["D:\\Projects\\mot-literature-mcp\\dist\\server.js"],
+      "env": {
+        "MOT_LIT_PDF_ROOT": "D:\\Tmp\\参考文献",
+        "MOT_LIT_CACHE_DIR": "D:\\Tmp\\mot-literature-mcp-cache"
+      }
+    }
+  }
+}

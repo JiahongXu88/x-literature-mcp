@@ -1,0 +1,13 @@
+node_modules/
+dist/
+.scratch/
+coverage/
+*.log
+.mcp.json
+# Never commit literature, renders, or caches
+*.pdf
+*.png
+*.jpg
+*.caj
+*-cache/
+cache/

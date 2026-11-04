@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * mot-literature-mcp — local stdio MCP server.
+ * X Literature MCP (x-literature-mcp) — local stdio MCP server.
  * stdout carries MCP protocol messages only; diagnostics go to stderr.
  */
 
@@ -10,7 +10,7 @@ import { StdioServerTransport } from "@modelcontextprotocol/server/stdio";
 import { Library, configFromEnv, log } from "./library.js";
 import { registerTools } from "./tools.js";
 
-export const SERVER_VERSION = "0.1.1";
+export const SERVER_VERSION = "0.2.0";
 
 async function main(): Promise<void> {
   let library: Library;
@@ -20,7 +20,7 @@ async function main(): Promise<void> {
     log(`startup failed: ${error instanceof Error ? error.message : String(error)}`);
     process.exit(2);
   }
-  const server = new McpServer({ name: "mot-literature", version: SERVER_VERSION });
+  const server = new McpServer({ name: "x-literature", version: SERVER_VERSION });
   registerTools(server, library);
   await server.connect(new StdioServerTransport());
   log(`ready (pdf_root=${library.config.pdfRoot}, cache_dir=${library.config.cacheDir})`);

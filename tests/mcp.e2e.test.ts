@@ -14,7 +14,7 @@ import { afterAll, beforeAll, describe, expect, it } from "vitest";
 
 const ROOT = resolve(import.meta.dirname, "..");
 const SERVER = join(ROOT, "dist", "server.js");
-const PYTHON = process.env.MOT_LIT_PYTHON ?? (process.platform === "win32" ? "python" : "python3");
+const PYTHON = process.env.X_LIT_PYTHON ?? (process.platform === "win32" ? "python" : "python3");
 const TOOLS = ["get_paper_references", "get_paper_structure", "list_papers", "read_paper_pages", "refresh_index", "render_paper_page", "search_papers"];
 
 let work: string;
@@ -42,14 +42,14 @@ async function idOf(fileName: string): Promise<string> {
 }
 
 beforeAll(async () => {
-  work = mkdtempSync(join(tmpdir(), "mot-lit-test-"));
+  work = mkdtempSync(join(tmpdir(), "x-lit-test-"));
   pdfRoot = join(work, "文献 库");
   cacheDir = join(work, "cache");
   execFileSync(PYTHON, [join(ROOT, "tests", "fixtures", "make_fixtures.py"), pdfRoot]);
   const transport = new StdioClientTransport({
     command: process.execPath,
     args: [SERVER],
-    env: { ...process.env, MOT_LIT_PDF_ROOT: pdfRoot, MOT_LIT_CACHE_DIR: cacheDir } as Record<string, string>,
+    env: { ...process.env, X_LIT_PDF_ROOT: pdfRoot, X_LIT_CACHE_DIR: cacheDir } as Record<string, string>,
     stderr: "pipe",
   });
   client = new Client({ name: "e2e", version: "0.0.0" });
@@ -63,7 +63,7 @@ afterAll(async () => {
 
 describe("MCP stdio server", () => {
   it("initializes and lists exactly the 7 tools", async () => {
-    expect(client.getServerVersion()?.name).toBe("mot-literature");
+    expect(client.getServerVersion()?.name).toBe("x-literature");
     const { tools } = await client.listTools();
     expect(tools.map((t) => t.name).sort()).toEqual(TOOLS);
     for (const tool of tools) expect(tool.inputSchema.type).toBe("object");
@@ -200,8 +200,8 @@ describe("MCP stdio server", () => {
 });
 
 describe("process behaviour", () => {
-  it("stdout carries only JSON-RPC; missing MOT_LIT_PDF_ROOT fails fast on stderr", async () => {
-    const child = spawn(process.execPath, [SERVER], { env: { ...process.env, MOT_LIT_PDF_ROOT: "" } });
+  it("stdout carries only JSON-RPC; missing X_LIT_PDF_ROOT fails fast on stderr", async () => {
+    const child = spawn(process.execPath, [SERVER], { env: { ...process.env, X_LIT_PDF_ROOT: "" } });
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (d) => (stdout += d));
@@ -209,9 +209,9 @@ describe("process behaviour", () => {
     const code = await new Promise<number | null>((r) => child.on("exit", r));
     expect(code).toBe(2);
     expect(stdout).toBe("");
-    expect(stderr).toContain("MOT_LIT_PDF_ROOT");
+    expect(stderr).toContain("X_LIT_PDF_ROOT");
 
-    const ok = spawn(process.execPath, [SERVER], { env: { ...process.env, MOT_LIT_PDF_ROOT: pdfRoot, MOT_LIT_CACHE_DIR: cacheDir } });
+    const ok = spawn(process.execPath, [SERVER], { env: { ...process.env, X_LIT_PDF_ROOT: pdfRoot, X_LIT_CACHE_DIR: cacheDir } });
     let out = "";
     ok.stdout.on("data", (d) => (out += d));
     ok.stdin.write(`${JSON.stringify({ jsonrpc: "2.0", id: 1, method: "initialize", params: { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "raw", version: "0" } } })}\n`);

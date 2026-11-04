@@ -1,7 +1,7 @@
 # PaperTeam reuse notes
 
 Source repository: https://github.com/JiahongXu88/PaperTeam (MIT, Copyright (c) 2026 Jiahong Xu)
-Audited at `main` HEAD **642103d80dbe7ea63fc7131d1b022b9de74e3ed2** (2026-11-03), local clone `D:\Projects\PaperTeam`, read-only (nothing in PaperTeam was modified).
+Audited at `main` HEAD **642103d80dbe7ea63fc7131d1b022b9de74e3ed2** (2026-11-03), from a local read-only clone (nothing in PaperTeam was modified).
 Each row was decided after reading the source file and its imports, not the README.
 
 | PaperTeam path (last change) | Depends on | Decision | What landed here |
@@ -13,7 +13,7 @@ Each row was decided after reading the source file and its imports, not the READ
 | `backend/test/paper/referenceExtraction.test.ts` | vitest, PaperTeam test stack | **port regression cases** | `tests/references.test.ts`: IEEE / GB/T 7714 / APA field cases and the M15.15 CJIG cases (full-width DOI brackets, typographic DOI spaces, broken arXiv URL, figure-caption/page-number exclusion). The HTTP/service e2e (attention.pdf) was not ported. |
 | `backend/src/ingestion/LegacyPdfTextParser.ts` (—) | `PdfParser`, `sectionChunking`, `PdfAnalyzer`, ingestion types | **skip** | Wrapper over PaperTeam's ingestion state; the useful part (PyMuPDF text layer) is covered by the worker. |
 | `backend/src/ingestion/DoclingParser.ts` (508803f) | `DoclingToolchain`, ingestion types, Docling Python env | **skip in MVP** | Docling needs a large model download; not required for text-layer CNKI PDFs (53/53 have text). Can be added later as an optional backend. |
-| `backend/src/ingestion/ParsedDocumentStore.ts`, `types.ts` | project store | **skip** | Cache here is one JSON per PDF hash under `MOT_LIT_CACHE_DIR`. |
+| `backend/src/ingestion/ParsedDocumentStore.ts`, `types.ts` | project store | **skip** | Cache here is one JSON per PDF hash under `X_LIT_CACHE_DIR`. |
 | `backend/src/retrieval/lexicalIndex.ts` (3bac8f8), `tokenize.ts`, `SourceChunker.ts`, `chunking.ts` | `SourceChunk` types | **skip** | BM25 over chunks is unnecessary for ~500 pages; `src/search.ts` does whitespace/width-insensitive substring matching per page, which keeps exact page provenance and handles Chinese words broken across lines. |
 | `backend/src/sources/identity.ts` | `referenceText.compactTitle` | **skip** | De-duplication is by file SHA-256 only. |
 | ProjectStore / EvidenceStore / AgentRuntime / WorkflowOrchestrator / Web UI / Quality Gate / target-journal services | — | **skip (out of scope)** | — |

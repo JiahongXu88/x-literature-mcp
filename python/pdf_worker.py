@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""mot-literature-mcp PDF worker (deterministic PyMuPDF text / page rendering).
+"""X Literature MCP PDF worker (deterministic PyMuPDF text / page rendering).
 
 Called by src/pdf.ts via child_process.execFile (no shell).
 Protocol: argv = <command> <pdf-path> [args...]; stdout carries exactly one JSON

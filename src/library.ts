@@ -35,7 +35,7 @@ export class ToolError extends Error {
 }
 
 export function log(message: string): void {
-  process.stderr.write(`[mot-literature-mcp] ${message}\n`);
+  process.stderr.write(`[x-literature-mcp] ${message}\n`);
 }
 
 // ---------------- config ----------------
@@ -47,19 +47,35 @@ export interface LibraryConfig {
   workerPath: string;
 }
 
+/**
+ * Reads `X_LIT_<suffix>`. The pre-0.2.0 name `MOT_LIT_<suffix>` is still
+ * accepted as a deprecated fallback (the new name always wins); it will be
+ * removed in 0.3.0.
+ */
+function readEnv(env: NodeJS.ProcessEnv, suffix: string): string | undefined {
+  const current = env[`X_LIT_${suffix}`]?.trim();
+  if (current) return current;
+  const legacy = env[`MOT_LIT_${suffix}`]?.trim();
+  if (legacy) {
+    log(`MOT_LIT_${suffix} is deprecated and will be removed in 0.3.0; use X_LIT_${suffix}`);
+    return legacy;
+  }
+  return undefined;
+}
+
 export function configFromEnv(env: NodeJS.ProcessEnv = process.env): LibraryConfig {
-  const pdfRoot = env.MOT_LIT_PDF_ROOT?.trim();
-  if (pdfRoot === undefined || pdfRoot === "") {
-    throw new Error("MOT_LIT_PDF_ROOT is not set (absolute path of the PDF folder)");
+  const pdfRoot = readEnv(env, "PDF_ROOT");
+  if (pdfRoot === undefined) {
+    throw new Error("X_LIT_PDF_ROOT is not set (absolute path of the PDF folder)");
   }
   if (!isAbsolute(pdfRoot)) {
-    throw new Error(`MOT_LIT_PDF_ROOT must be an absolute path: ${pdfRoot}`);
+    throw new Error(`X_LIT_PDF_ROOT must be an absolute path: ${pdfRoot}`);
   }
-  const cacheDir = env.MOT_LIT_CACHE_DIR?.trim() || join(tmpdir(), "mot-literature-mcp-cache");
+  const cacheDir = readEnv(env, "CACHE_DIR") ?? join(tmpdir(), "x-literature-mcp-cache");
   if (!isAbsolute(cacheDir)) {
-    throw new Error(`MOT_LIT_CACHE_DIR must be an absolute path: ${cacheDir}`);
+    throw new Error(`X_LIT_CACHE_DIR must be an absolute path: ${cacheDir}`);
   }
-  const python = env.MOT_LIT_PYTHON?.trim() || (process.platform === "win32" ? "python" : "python3");
+  const python = readEnv(env, "PYTHON") ?? (process.platform === "win32" ? "python" : "python3");
   const here = dirname(fileURLToPath(import.meta.url));
   return { pdfRoot: resolve(pdfRoot), cacheDir: resolve(cacheDir), python, workerPath: resolve(here, "..", "python", "pdf_worker.py") };
 }
@@ -168,7 +184,7 @@ export class Library {
       throw new ToolError("pdf_root_missing", `PDF root is not a directory: ${this.config.pdfRoot}`);
     }
     if (isInside(this.realRoot, this.config.cacheDir)) {
-      throw new ToolError("bad_config", "MOT_LIT_CACHE_DIR must not be inside MOT_LIT_PDF_ROOT");
+      throw new ToolError("bad_config", "X_LIT_CACHE_DIR must not be inside X_LIT_PDF_ROOT");
     }
     const manifest = await this.readManifest();
     const found = await walkPdfs(this.realRoot);
@@ -366,7 +382,7 @@ export class Library {
               new ToolError(
                 spawnFailed ? "worker_unavailable" : "worker_failed",
                 spawnFailed
-                  ? `Python not found (${this.config.python}); set MOT_LIT_PYTHON`
+                  ? `Python not found (${this.config.python}); set X_LIT_PYTHON`
                   : `pdf worker failed: ${(stderr || String(error ?? "")).slice(-400)}`,
               ),
             );

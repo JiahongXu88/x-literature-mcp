@@ -1,12 +1,12 @@
 {
-  "name": "mot-literature-mcp",
-  "version": "0.1.1",
-  "description": "Local stdio MCP server for deterministic PDF literature access: page text, page images, references, full-text search. No LLM, no network.",
+  "name": "x-literature-mcp",
+  "version": "0.2.0",
+  "description": "X Literature MCP — a local, read-only MCP server for academic PDF reading, page rendering, references, and keyword search. No LLM, no network.",
   "license": "MIT",
   "type": "module",
   "main": "dist/server.js",
   "bin": {
-    "mot-literature-mcp": "dist/server.js"
+    "x-literature-mcp": "dist/server.js"
   },
   "files": [
     "dist",

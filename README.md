@@ -1,66 +1,94 @@
-# mot-literature-mcp
+# X Literature MCP
 
-A local **stdio MCP server** that gives Claude Code (or any MCP client) deterministic access to a folder of PDF papers:
-list, page-level text, page images, reference lists, and keyword search with page numbers.
+**X Literature MCP** (`x-literature-mcp`) is a local, read-only **stdio MCP server** for local PDF reading, page
+rendering, references, and keyword search via MCP. It gives any MCP client (Claude Code, Claude Desktop, or another
+MCP-compatible host) deterministic access to a folder of PDF papers: list, page-level text, page images, reference
+lists, and keyword search with page numbers.
 
 It only preprocesses and serves source material. It does **not** call any LLM, summarize, judge novelty,
-write paper cards, build knowledge graphs, OCR scanned pages, or touch the network. Original PDFs are only read.
+write paper cards, build knowledge graphs, OCR scanned pages, do semantic search, or touch the network.
+Original PDFs are only read.
 
 - Node.js ≥ 20 + TypeScript, MCP TypeScript SDK v2 (`@modelcontextprotocol/server` 2.4)
 - Python 3.9+ with PyMuPDF for text extraction and page rendering (no Docling, no model downloads)
 - Derived cache: one JSON per PDF content hash, stored **outside** the repo and outside the PDF folder
 
 Reference-list parsing is ported from [PaperTeam](https://github.com/JiahongXu88/PaperTeam) (MIT); see [docs/REUSE_NOTES.md](docs/REUSE_NOTES.md).
+The heuristics were developed and tested mainly on Chinese journal PDFs (GB/T 7714 and CJIG styles) and also handle
+common English styles (IEEE, APA).
 
 ## Install
 
 ```bash
-git clone https://github.com/JiahongXu88/mot-literature-mcp.git
-cd mot-literature-mcp
+git clone https://github.com/JiahongXu88/x-literature-mcp.git
+cd x-literature-mcp
 npm ci
 npm run build
-python -m pip install pymupdf      # PyMuPDF ≥ 1.24
+python -m pip install pymupdf      # PyMuPDF ≥ 1.24, installed separately (AGPL-3.0 / commercial)
 ```
 
 ## Configuration (environment variables)
 
 | Variable | Required | Meaning |
 |---|---|---|
-| `MOT_LIT_PDF_ROOT` | yes | Absolute path of the PDF folder (scanned recursively; symlinks skipped) |
-| `MOT_LIT_CACHE_DIR` | no | Absolute path for the derived cache. Default: `<OS temp>/mot-literature-mcp-cache`. Must not be inside the PDF folder. |
-| `MOT_LIT_PYTHON` | no | Python executable with PyMuPDF. Default `python` (Windows) / `python3` |
+| `X_LIT_PDF_ROOT` | yes | Absolute path of the PDF folder (scanned recursively; symlinks skipped) |
+| `X_LIT_CACHE_DIR` | no | Absolute path for the derived cache. Default: `<OS temp>/x-literature-mcp-cache`. Must not be inside the PDF folder. |
+| `X_LIT_PYTHON` | no | Python executable with PyMuPDF. Default `python` (Windows) / `python3` |
+
+Upgrading from `mot-literature-mcp` ≤ 0.1.1: the old variable names (prefix `MOT_LIT_` instead of `X_LIT_`) are
+still read as a fallback when the new name is unset, with a deprecation warning on stderr. The fallback will be
+removed in 0.3.0. Set an explicit cache folder if you want to keep reusing an existing cache.
 
 ## Register with Claude Code
 
-Non-destructive (adds one entry, leaves other servers untouched). Windows example:
+Non-destructive (adds one entry, leaves other servers untouched). Replace the placeholder paths with your own.
+
+macOS / Linux:
+
+```bash
+claude mcp add --scope user x-literature \
+  -e X_LIT_PDF_ROOT="/path/to/your/papers" \
+  -e X_LIT_CACHE_DIR="/path/to/x-literature-mcp-cache" \
+  -- node "/path/to/x-literature-mcp/dist/server.js"
+```
+
+Windows (PowerShell):
 
 ```powershell
-claude mcp add --scope user mot-literature `
-  -e MOT_LIT_PDF_ROOT="D:\Tmp\参考文献" `
-  -e MOT_LIT_CACHE_DIR="D:\Tmp\mot-literature-mcp-cache" `
-  -- node "D:\Projects\mot-literature-mcp\dist\server.js"
+claude mcp add --scope user x-literature `
+  -e X_LIT_PDF_ROOT="C:\path\to\your\papers" `
+  -e X_LIT_CACHE_DIR="C:\path\to\x-literature-mcp-cache" `
+  -- node "C:\path\to\x-literature-mcp\dist\server.js"
 ```
+
+Windows (CMD):
 
 ```cmd
-claude mcp add --scope user mot-literature -e MOT_LIT_PDF_ROOT="D:\Tmp\参考文献" -e MOT_LIT_CACHE_DIR="D:\Tmp\mot-literature-mcp-cache" -- node "D:\Projects\mot-literature-mcp\dist\server.js"
+claude mcp add --scope user x-literature -e X_LIT_PDF_ROOT="C:\path\to\your\papers" -e X_LIT_CACHE_DIR="C:\path\to\x-literature-mcp-cache" -- node "C:\path\to\x-literature-mcp\dist\server.js"
 ```
 
-Check: `claude mcp list` (should show `mot-literature … ✔ Connected`), or `/mcp` inside Claude Code.
-Remove: `claude mcp remove --scope user mot-literature`.
+Check: `claude mcp list` (should show `x-literature … ✔ Connected`), or `/mcp` inside Claude Code.
+Remove: `claude mcp remove --scope user x-literature`.
 
-Project-scoped alternative: copy [.mcp.json.example](.mcp.json.example) to `.mcp.json` in your project and adjust paths (`.mcp.json` is git-ignored here).
+Other MCP clients / project scope: copy [.mcp.json.example](.mcp.json.example) to `.mcp.json` (or into your client's
+MCP configuration) and replace the placeholder paths (`.mcp.json` is git-ignored here).
 
 ### Run manually
 
+```bash
+# macOS / Linux
+X_LIT_PDF_ROOT=/path/to/your/papers X_LIT_CACHE_DIR=/path/to/x-literature-mcp-cache node dist/server.js
+```
+
 ```powershell
 # PowerShell
-$env:MOT_LIT_PDF_ROOT = "D:\Tmp\参考文献"; $env:MOT_LIT_CACHE_DIR = "D:\Tmp\mot-literature-mcp-cache"; node dist\server.js
+$env:X_LIT_PDF_ROOT = "C:\path\to\your\papers"; $env:X_LIT_CACHE_DIR = "C:\path\to\x-literature-mcp-cache"; node dist\server.js
 ```
 
 ```cmd
 :: CMD
-set MOT_LIT_PDF_ROOT=D:\Tmp\参考文献
-set MOT_LIT_CACHE_DIR=D:\Tmp\mot-literature-mcp-cache
+set X_LIT_PDF_ROOT=C:\path\to\your\papers
+set X_LIT_CACHE_DIR=C:\path\to\x-literature-mcp-cache
 node dist\server.js
 ```
 
@@ -125,7 +153,7 @@ formula/table text-layer damage; lost words from font mapping.
 
 ## Cache and safety
 
-- Cache entry: `<MOT_LIT_CACHE_DIR>/papers/<sha256>.<extractor-version>.json`, plus `manifest.json` (path, size, mtime, hash).
+- Cache entry: `<X_LIT_CACHE_DIR>/papers/<sha256>.<extractor-version>.json`, plus `manifest.json` (path, size, mtime, hash).
   A changed file gets a new hash, so its old cache entry and `paper_id` stop being used; `refresh_index` re-parses only new/changed files.
 - No tool accepts a path. Files are resolved from the scan result and re-checked (realpath inside the root, size/mtime unchanged) before each read.
 - One unreadable/encrypted PDF is recorded as `failed` and does not stop the others.
@@ -143,15 +171,19 @@ npm test            # builds, then: unit tests + real stdio MCP e2e on synthetic
 
 | Symptom | Fix |
 |---|---|
-| `worker_unavailable` / `PyMuPDF not installed` | `python -m pip install pymupdf`, or set `MOT_LIT_PYTHON` to the interpreter that has it |
-| `pdf_root_missing` | `MOT_LIT_PDF_ROOT` must be an existing absolute folder |
-| Server exits with code 2 | Missing/relative `MOT_LIT_PDF_ROOT` or `MOT_LIT_CACHE_DIR` (see stderr) |
+| `worker_unavailable` / `PyMuPDF not installed` | `python -m pip install pymupdf`, or set `X_LIT_PYTHON` to the interpreter that has it |
+| `pdf_root_missing` | `X_LIT_PDF_ROOT` must be an existing absolute folder |
+| Server exits with code 2 | Missing/relative `X_LIT_PDF_ROOT` or `X_LIT_CACHE_DIR` (see stderr) |
 | `unknown_paper_id` | The file changed or was removed; call `list_papers` again |
 | `encrypted` / `open_failed` | Password-protected or damaged PDF; open it elsewhere |
-| First `list_papers` slow | It parses all PDFs once (~8 s for 53 CNKI papers); later calls use the cache |
+| First `list_papers` slow | It parses all PDFs once (about 8 s for 53 two-column journal papers on a desktop PC); later calls use the cache |
 
 ## Changelog
 
+- **0.2.0** — renamed from `mot-literature-mcp` to **X Literature MCP** (`x-literature-mcp`); MCP server name
+  `mot-literature` → `x-literature`; environment variables `MOT_LIT_*` → `X_LIT_*` (old names still read as a deprecated
+  fallback, see Configuration); default cache folder `<OS temp>/x-literature-mcp-cache`. Tool names, inputs, outputs,
+  `paper_id` and cache keys are unchanged.
 - **0.1.1** — reference extraction `r5.pt-v4n3` (old caches are ignored and rebuilt automatically). Layout-aware
   handling of `下转/上接` continuation markers (another article's references no longer merged or chosen as the heading);
   detached `[n]` labels re-attached (fixes off-by-one numbering); publication year taken only from bibliographic

@@ -1,12 +1,12 @@
 {
   "mcpServers": {
-    "mot-literature": {
+    "x-literature": {
       "type": "stdio",
       "command": "node",
-      "args": ["D:\\Projects\\mot-literature-mcp\\dist\\server.js"],
+      "args": ["/absolute/path/to/x-literature-mcp/dist/server.js"],
       "env": {
-        "MOT_LIT_PDF_ROOT": "D:\\Tmp\\参考文献",
-        "MOT_LIT_CACHE_DIR": "D:\\Tmp\\mot-literature-mcp-cache"
+        "X_LIT_PDF_ROOT": "/absolute/path/to/your/pdf-folder",
+        "X_LIT_CACHE_DIR": "/absolute/path/to/x-literature-mcp-cache"
       }
     }
   }
